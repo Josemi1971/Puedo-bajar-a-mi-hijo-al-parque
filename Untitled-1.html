@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Puedo bajar a mi hijo al parque?</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            padding: 20px;
+        }
+        #response {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>¿Puedo bajar a mi hijo al parque?</h1>
+    <p>Haz clic en el botón para averiguar.</p>
+    <button onclick="checkWeather()">Comprobar</button>
+    <div id="response"></div>
+
+    <script>
+        async function checkWeather() {
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = "Comprobando...";
+
+            // Obtener ubicación del usuario
+            if (!navigator.geolocation) {
+                responseDiv.textContent = "La geolocalización no es compatible con tu navegador.";
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                try {
+                    // Obtener datos del clima usando OpenWeather API
+                    const apiKey = "56b4e0af95612c13f91a673f2d132b71";
+                    const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=es`);
+                    const weatherData = await weatherResponse.json();
+
+                    const weather = weatherData.weather[0].description;
+                    const temp = weatherData.main.temp;
+
+                    // Lógica para decidir si es adecuado salir al parque
+                    if (weather.includes("lluvia") || weather.includes("tormenta") || temp < 10 || temp > 35) {
+                        responseDiv.textContent = "NO, no es un buen momento para salir al parque.";
+                    } else {
+                        responseDiv.textContent = "SÍ, puedes llevar a tu hijo/a al parque.";
+                    }
+                } catch (error) {
+                    responseDiv.textContent = "Hubo un error al obtener los datos del clima.";
+                }
+            }, () => {
+                responseDiv.textContent = "No se pudo obtener la ubicación.";
+            });
+        }
+    </script>
+</body>
+</html>
